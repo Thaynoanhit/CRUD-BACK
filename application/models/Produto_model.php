@@ -6,6 +6,7 @@ class Produto_model extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
+        $this->load->helper('url');
     }
 
     // Create
@@ -18,7 +19,9 @@ class Produto_model extends CI_Model {
         $this->db->where('deleted_at IS NULL');
         $produtos = $this->db->get('produtos')->result();
         foreach($produtos as $produto) {
-            $produto->imagem_url = base_url($produto->imagem_url);
+            if ($produto->imagem_url) {
+                $produto->imagem_url = $this->get_full_url($produto->imagem_url);
+            }
         }
         return $produtos;
     }
@@ -26,8 +29,24 @@ class Produto_model extends CI_Model {
     public function get_produto($id) {
         $this->db->where('deleted_at IS NULL');
         $produto = $this->db->get_where('produtos', array('id' => $id))->row();
-        $produto->imagem_url = base_url($produto->imagem_url);
+        if ($produto && $produto->imagem_url) {
+            $produto->imagem_url = $this->get_full_url($produto->imagem_url);
+        }
         return $produto;
+    }
+
+    private function get_full_url($path) {
+
+        $server_url = 'http://192.168.18.41:8080';
+        
+        // Garantir o caminho relativo limpo
+        $path = ltrim(preg_replace('/^https?:\/\/.*?\//i', '', $path), '/');
+        
+        // Remover "api/" do início do caminho se existir
+        $path = preg_replace('/^api\//', '', $path);
+        
+        // Retorna a URL completa
+        return $server_url . '/' . $path;
     }
 
     // Update
@@ -36,7 +55,6 @@ class Produto_model extends CI_Model {
         return $this->db->update('produtos', $data, array('id' => $id));
     }
     
-
     // Soft Delete - Apenas marca o registro como deletado
     public function deletar_produto($id) {
         $data = array(
@@ -45,5 +63,4 @@ class Produto_model extends CI_Model {
         );
         return $this->db->update('produtos', $data, array('id' => $id));
     }
-
 }

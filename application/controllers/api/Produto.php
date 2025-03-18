@@ -33,7 +33,6 @@ class Produto extends REST_Controller {
         }
     }
     
-    
     public function index_post() {
         $config['upload_path'] = './uploads/produtos/';
         $config['allowed_types'] = 'gif|jpg|jpeg|png';
@@ -46,7 +45,6 @@ class Produto extends REST_Controller {
         
         $this->load->library('upload', $config);
         
-        
         $data = [
             'nome' => $this->post('nome'),
             'descricao' => $this->post('descricao'),
@@ -55,10 +53,8 @@ class Produto extends REST_Controller {
             'imagem_url' => NULL 
         ];
         
-        
         if (!empty($_FILES['imagem']['name'])) {
             if (!$this->upload->do_upload('imagem')) {
-                // Erro no upload
                 $error = $this->upload->display_errors('', '');
                 $this->response([
                     'status' => FALSE,
@@ -67,11 +63,11 @@ class Produto extends REST_Controller {
                 return;
             } else {
                 $upload_data = $this->upload->data();
+                // serve apenas para guarda o caminho relativo na base de dados
                 $image_path = 'uploads/produtos/' . $upload_data['file_name'];
                 $data['imagem_url'] = $image_path;
             }
         }
-        
         
         $produto_id = $this->produto_model->criar_produto($data);
         
@@ -86,7 +82,6 @@ class Produto extends REST_Controller {
         }
     }
     
-   
     public function index_put($id) {
         $produto_atual = $this->produto_model->get_produto($id);
         if (!$produto_atual) {
@@ -182,15 +177,15 @@ class Produto extends REST_Controller {
                 ], REST_Controller::HTTP_BAD_REQUEST);
                 return;
             } else {
-                // Remove a imagem antiga se existir
                 if (!empty($produto->imagem_url)) {
-                    $old_image = str_replace(base_url(), '', $produto->imagem_url);
+                    $old_image = preg_replace('/^https?:\/\/.*?\//i', '', $produto->imagem_url);
                     if (file_exists($old_image)) {
                         unlink($old_image);
                     }
                 }
                 
                 $upload_data = $this->upload->data();
+                // serve apenas para guardar o caminho relativo na base de dados
                 $image_path = 'uploads/produtos/' . $upload_data['file_name'];
                 
                 // Atualiza apenas o campo imagem_url
