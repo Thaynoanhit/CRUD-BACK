@@ -39,10 +39,10 @@ class Produto_model extends CI_Model {
 
         $server_url = 'http://192.168.18.41:8080';
         
-        // Garantir o caminho relativo limpo
+        // a função ltrim do php serve para remover a barra do início do caminho
         $path = ltrim(preg_replace('/^https?:\/\/.*?\//i', '', $path), '/');
         
-        // Remover "api/" do início do caminho se existir
+        // a função preg_replace do php serve para remover a palavra api/ do início do caminho
         $path = preg_replace('/^api\//', '', $path);
         
         // Retorna a URL completa
